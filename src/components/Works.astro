@@ -10,7 +10,12 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
   <span class="works__anchor" id="works"></span>
   <div class="works__pin" data-works-pin>
     <div class="works__side">
-      <p class="mono works__label">(Избранные работы)</p>
+      <div class="works__head">
+        <p class="mono works__label">(Избранные работы)</p>
+        <ol class="works__progress" aria-hidden="true">
+          {projects.map((_, i) => <li class:list={['progress__seg', { 'is-active': i === 0 }]} data-seg />)}
+        </ol>
+      </div>
 
       <div class="works__details">
         {
@@ -135,21 +140,50 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
     transform: translateY(-50%);
   }
 
+  .works__head {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  /* Полоса прогресса: сегмент на проект, активный — длинный и лаймовый */
+  .works__progress {
+    display: flex;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .progress__seg {
+    width: 24px;
+    height: 2px;
+    background: rgba(237, 235, 230, 0.22);
+    transition:
+      width 0.6s var(--ease-out),
+      background-color 0.4s var(--ease-out);
+  }
+
+  .progress__seg.is-active {
+    width: 56px;
+    background: var(--accent);
+  }
+
+  /* Строки деталей сменяются по очереди: старые уходят вверх, новые выезжают снизу (GSAP).
+     Классы — запасной вариант без анимаций. */
   .details {
     grid-area: 1 / 1;
     display: grid;
     gap: 14px;
     margin: 0;
-    opacity: 0;
-    transform: translateY(12px);
-    transition:
-      opacity 0.5s var(--ease-out),
-      transform 0.6s var(--ease-out);
   }
 
-  .details.is-active {
+  .details > * {
+    opacity: 0;
+  }
+
+  .details.is-active > * {
     opacity: 1;
-    transform: none;
   }
 
   .details > div {
@@ -299,6 +333,14 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
     opacity: 1;
   }
 
+  .item__client {
+    transition: color 0.4s var(--ease-out);
+  }
+
+  .item.is-active .item__client {
+    color: var(--accent);
+  }
+
   .item a {
     display: flex;
     flex-direction: column;
@@ -428,6 +470,7 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
     const planes = [...section.querySelectorAll<HTMLElement>('[data-plane]')];
     const items = [...section.querySelectorAll<HTMLElement>('[data-item]')];
     const details = [...section.querySelectorAll<HTMLElement>('[data-detail]')];
+    const segs = [...section.querySelectorAll<HTMLElement>('[data-seg]')];
     const list = section.querySelector<HTMLElement>('[data-list]');
     const index = section.querySelector<HTMLElement>('[data-index]');
     const count = planes.length;
@@ -478,9 +521,20 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
 
       const active = Math.round(p);
       if (active !== state.active) {
+        const prev = state.active;
         state.active = active;
         items.forEach((item, i) => item.classList.toggle('is-active', i === active));
         details.forEach((detail, i) => detail.classList.toggle('is-active', i === active));
+        segs.forEach((seg, i) => seg.classList.toggle('is-active', i === active));
+        if (!reduced && details[active]) {
+          if (prev >= 0 && details[prev])
+            gsap.to(details[prev].children, { y: -18, opacity: 0, duration: 0.3, stagger: 0.03, ease: 'power2.in', overwrite: true });
+          gsap.fromTo(
+            details[active].children,
+            { y: 22, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.7, stagger: 0.06, delay: prev >= 0 ? 0.15 : 0, ease: 'expo.out', overwrite: true },
+          );
+        }
         if (index) {
           const value = String(active + 1).padStart(2, '0');
           if (reduced) index.textContent = value;

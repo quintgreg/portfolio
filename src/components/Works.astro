@@ -97,7 +97,7 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
     position: relative;
     z-index: 2;
     margin-top: -200svh;
-    height: calc(var(--count) * 90svh + 200svh);
+    height: calc(var(--count) * 55svh + 200svh);
   }
 
   .works__anchor {
@@ -160,8 +160,8 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
     height: 2px;
     background: rgba(237, 235, 230, 0.22);
     transition:
-      width 0.6s var(--ease-out),
-      background-color 0.4s var(--ease-out);
+      width 0.3s var(--ease-out),
+      background-color 0.2s var(--ease-out);
   }
 
   .progress__seg.is-active {
@@ -326,7 +326,7 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
     justify-content: center;
     height: var(--step, 34svh);
     opacity: 0.22;
-    transition: opacity 0.5s var(--ease-out);
+    transition: opacity 0.2s var(--ease-out);
   }
 
   .item.is-active {
@@ -438,7 +438,7 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
   @media (prefers-reduced-motion: reduce) {
     .works {
       margin-top: 0;
-      height: calc(var(--count) * 90svh + 100svh);
+      height: calc(var(--count) * 55svh + 100svh);
     }
 
     .works__anchor {
@@ -528,11 +528,11 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
         segs.forEach((seg, i) => seg.classList.toggle('is-active', i === active));
         if (!reduced && details[active]) {
           if (prev >= 0 && details[prev])
-            gsap.to(details[prev].children, { y: -18, opacity: 0, duration: 0.3, stagger: 0.03, ease: 'power2.in', overwrite: true });
+            gsap.to(details[prev].children, { y: -14, opacity: 0, duration: 0.15, ease: 'power2.in', overwrite: true });
           gsap.fromTo(
             details[active].children,
             { y: 22, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.7, stagger: 0.06, delay: prev >= 0 ? 0.15 : 0, ease: 'expo.out', overwrite: true },
+            { y: 0, opacity: 1, duration: 0.35, stagger: 0.03, ease: 'expo.out', overwrite: true },
           );
         }
         if (index) {
@@ -541,11 +541,11 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
           else
             gsap
               .timeline()
-              .to(index, { yPercent: -30, autoAlpha: 0, duration: 0.18, ease: 'power2.in' })
+              .to(index, { yPercent: -30, autoAlpha: 0, duration: 0.1, ease: 'power2.in' })
               .add(() => {
                 index.textContent = value;
               })
-              .fromTo(index, { yPercent: 30, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: 0.35, ease: 'power3.out' });
+              .fromTo(index, { yPercent: 30, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: 0.22, ease: 'power3.out' });
         }
       }
     };
@@ -585,7 +585,8 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
         start: () => (reduced ? 'top top' : `top top-=${window.innerHeight}`),
         end: 'bottom bottom',
         invalidateOnRefresh: true,
-        snap: count > 1 ? { snapTo: 1 / (count - 1), duration: { min: 0.2, max: 0.6 }, ease: 'power2.inOut' } : undefined,
+        // быстрое «прилипание» к ближайшему проекту почти сразу после остановки скролла
+        snap: count > 1 ? { snapTo: 1 / (count - 1), duration: { min: 0.12, max: 0.3 }, delay: 0.02, ease: 'power3.out' } : undefined,
         onUpdate(self) {
           state.target = self.progress * (count - 1);
           if (reduced) {
@@ -598,7 +599,7 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
       const tick = () => {
         const delta = state.target - state.current;
         if (Math.abs(delta) < 0.0005) return;
-        state.current += delta * 0.09;
+        state.current += delta * 0.3; // почти без инерции — карточки идут за скроллом
         render();
       };
       if (!reduced) gsap.ticker.add(tick);

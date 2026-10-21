@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import Contact from '../../components/Contact.astro';
 import { site } from '../../data/site';
+import { Image } from 'astro:assets';
 
 export async function getStaticPaths() {
   const projects = (await getCollection('projects', (p) => !p.data.href)).sort((a, b) => a.data.order - b.data.order);
@@ -14,7 +15,7 @@ export async function getStaticPaths() {
 
 const { project, next } = Astro.props;
 const { Content } = await render(project);
-const { title, client, year, role, stack, summary, colors, url } = project.data;
+const { title, client, year, role, stack, summary, colors, url, repo, cover, gallery } = project.data;
 ---
 
 <Layout title={`${title} — ${site.name}`} description={summary}>
@@ -44,19 +45,43 @@ const { title, client, year, role, stack, summary, colors, url } = project.data;
       </dl>
 
       {
-        url && (
-          <a class="mono case__link" href={url} target="_blank" rel="noopener noreferrer">
-            Открыть сайт ↗
-          </a>
+        (url || repo) && (
+          <div class="case__links">
+            {url && (
+              <a class="mono case__link" href={url} target="_blank" rel="noopener noreferrer">
+                Открыть сайт ↗
+              </a>
+            )}
+            {repo && (
+              <a class="mono case__link" href={repo} target="_blank" rel="noopener noreferrer">
+                Код на GitHub ↗
+              </a>
+            )}
+          </div>
         )
       }
     </header>
 
-    <div class="case__cover" style={`--c1: ${colors[0]}; --c2: ${colors[1]}`} data-reveal></div>
+    <div class="case__cover" style={`--c1: ${colors[0]}; --c2: ${colors[1]}`} data-reveal>
+      {cover && <Image class="case__shot" src={cover} alt={`${title} — главная страница`} widths={[800, 1400, 2000]} sizes="100vw" loading="eager" />}
+    </div>
 
     <article class="case__body" data-reveal>
       <Content />
     </article>
+
+    {
+      gallery && (
+        <div class="case__gallery">
+          {gallery.map((shot) => (
+            <figure class:list={['shot', { 'shot--tall': shot.src.height > shot.src.width }]} data-reveal>
+              <Image src={shot.src} alt={shot.alt} widths={[600, 1000, 1400]} sizes="(max-width: 720px) 100vw, 50vw" />
+              <figcaption class="mono">{shot.alt}</figcaption>
+            </figure>
+          ))}
+        </div>
+      )
+    }
 
     <a class="next" href={`/work/${next.id}/`}>
       <span class="mono">(Следующий проект)</span>
@@ -111,6 +136,12 @@ const { title, client, year, role, stack, summary, colors, url } = project.data;
     margin: 6px 0 0;
   }
 
+  .case__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 32px;
+  }
+
   .case__link {
     width: fit-content;
     color: var(--accent);
@@ -120,10 +151,47 @@ const { title, client, year, role, stack, summary, colors, url } = project.data;
     height: clamp(260px, 50vw, 640px);
     margin-inline: var(--gutter);
     border-radius: 4px;
+    overflow: hidden;
     background:
       radial-gradient(70% 90% at 25% 30%, var(--c1), transparent 70%),
       radial-gradient(60% 80% at 80% 75%, var(--c2), transparent 70%),
       #141418;
+  }
+
+  .case__shot {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+  }
+
+  .case__gallery {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(16px, 2vw, 32px);
+    padding: 0 var(--gutter) clamp(64px, 10vw, 140px);
+  }
+
+  .shot {
+    margin: 0;
+  }
+
+  .shot :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+  }
+
+  .shot figcaption {
+    margin-top: 12px;
+  }
+
+  /* вертикальный скриншот (телефон) — по центру, узкой колонкой */
+  .shot--tall {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(100%, 340px);
   }
 
   .case__body {
@@ -194,6 +262,10 @@ const { title, client, year, role, stack, summary, colors, url } = project.data;
   @media (max-width: 720px) {
     .case__meta {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .case__gallery {
+      grid-template-columns: 1fr;
     }
   }
 </style>

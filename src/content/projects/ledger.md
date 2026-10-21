@@ -6,7 +6,7 @@ role: Fullstack
 stack: [React, Node.js, PostgreSQL, TypeScript]
 summary: Панель управления финансами для малого бизнеса — от модели данных до анимированных графиков.
 colors: ['#1f6feb', '#edebe6']
-order: 2
+order: 3
 ---
 
 ## Задача

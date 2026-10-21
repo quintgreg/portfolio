@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -59,9 +60,22 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
             style={`--c1: ${project.data.colors[0]}; --c2: ${project.data.colors[1]}`}
             data-plane
           >
-            <span class="plane__glow" />
+            {project.data.cover ? (
+              <>
+                <Image
+                  class="plane__cover"
+                  src={project.data.cover}
+                  alt=""
+                  widths={[480, 800, 1120]}
+                  sizes="(max-width: 900px) 78vw, 34vw"
+                />
+                <span class="plane__shade" />
+              </>
+            ) : (
+              <span class="plane__glow" />
+            )}
             <span class="plane__grain" />
-            <span class="mono plane__tag">{project.data.href ? 'Свободно' : 'Скоро'}</span>
+            {!project.data.cover && <span class="mono plane__tag">{project.data.href ? 'Свободно' : 'Скоро'}</span>}
             <span class="plane__num">{pad(i + 1)}</span>
             <span class="mono plane__name">{project.data.title}</span>
           </a>
@@ -250,6 +264,22 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
     filter: blur(20px);
     opacity: 0.85;
     animation: drift 9s ease-in-out infinite alternate;
+  }
+
+  .plane__cover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left top;
+  }
+
+  /* затемнение снизу — чтобы номер и название читались поверх скриншота */
+  .plane__shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(11, 11, 13, 0.85), rgba(11, 11, 13, 0) 55%);
   }
 
   .plane__grain {

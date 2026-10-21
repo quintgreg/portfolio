@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# инструменты записи видео-тура — локально, в репозиторий не входят
+site-video/

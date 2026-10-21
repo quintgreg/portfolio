@@ -615,8 +615,10 @@ const link = (project: (typeof projects)[number]) => project.data.href ?? `/work
         start: () => (reduced ? 'top top' : `top top-=${window.innerHeight}`),
         end: 'bottom bottom',
         invalidateOnRefresh: true,
-        // быстрое «прилипание» к ближайшему проекту почти сразу после остановки скролла
-        snap: count > 1 ? { snapTo: 1 / (count - 1), duration: { min: 0.12, max: 0.3 }, delay: 0.02, ease: 'power3.out' } : undefined,
+        // «Прилипание» к ближайшему проекту после остановки скролла. Задержка 0.15 с нужна:
+        // колесо мыши крутит рывками с паузами ~50–100 мс, и при меньшей задержке snap
+        // начинал тянуть карусель назад между щелчками колеса — получалось передёргивание.
+        snap: count > 1 ? { snapTo: 1 / (count - 1), duration: { min: 0.15, max: 0.35 }, delay: 0.15, ease: 'power3.out' } : undefined,
         onUpdate(self) {
           state.target = self.progress * (count - 1);
           if (reduced) {

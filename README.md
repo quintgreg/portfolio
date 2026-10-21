@@ -1,43 +1,75 @@
-# Astro Starter Kit: Minimal
 
-```sh
-npm create astro@latest -- --template minimal
+[Связаться](advasertip@gmail.com) 
+
+
+
+## Что внутри
+
+### * Живой первый экран
+Фон — WebGL-шейдер, написанный с нуля на GLSL. Шум с доменным искажением складывается в «топографические» линии, которые медленно текут, тянутся к курсору и подсвечиваются рядом с ним. Заголовок собирается из букв, вылетающих снизу, и подгоняется точно под ширину экрана. В углах — часы в реальном времени и статус «Открыт к проектам».
+
+### * Работы, которые раскрываются
+Блок работ появляется миниатюрой поверх первого экрана и при скролле разворачивается на весь экран. Дальше — 3D-карусель: карточки проектов в перспективе листаются прокруткой и «прилипают» к каждому проекту. Слева — клиент, роль, год и стек, справа — список проектов, а линии-разделители двигаются вместе с ними.
+
+Первая карточка свободна. Она для вас.
+
+### * Бегущая строка стека
+Контурный текст, который ускоряется от скорости прокрутки и плавно возвращается к своему темпу.
+
+### * Финал, который мигает
+«Давайте сделаем что-то **живое**» — фраза подрагивает, как гудящая лампа, а слово «живое» щёлкает, гаснет и загорается другим цветом вместе со своей плашкой.
+
+### * Страницы кейсов
+У каждого проекта своя страница: задача, решение, результат. Переход между списком и кейсом анимирован через View Transitions: название проекта «перелетает» на новую страницу.
+
+---
+
+## Детали, о которых не видно
+
+- **Бережно к железу.** Шейдер рендерится только пока виден на экране, плотность пикселей ограничена — сцена держит частоту кадров даже на встроенной графике.
+- **Бережно к людям.** Если в системе включено «уменьшение движения», анимации останавливаются, а весь контент остаётся доступен.
+- **Быстро.** Сайт собирается в статический HTML; JavaScript грузится только там, где действительно нужен (Astro-острова).
+- **Адаптивно.** От широкого монитора до телефона.
+
+---
+
+## Стек
+
+| | |
+|---|---|
+| Фреймворк | [Astro](https://astro.build) — статическая генерация и острова |
+| 3D | [Three.js](https://threejs.org) + [React Three Fiber](https://r3f.docs.pmnd.rs) |
+| Шейдер | GLSL (fbm-шум, изолинии, свечение, зерно) |
+| Анимация | [GSAP](https://gsap.com) + ScrollTrigger |
+| Переходы | View Transitions (`astro:transitions`) |
+| Контент | Content Collections — кейсы в Markdown |
+| Шрифты | Unbounded · Manrope · JetBrains Mono |
+
+---
+
+## Запуск
+
+Нужен Node.js 22+.
+
+```bash
+npm install
+npm run dev       # http://localhost:4321
+npm run build     # статическая сборка в dist/
+npm run preview   # посмотреть сборку локально
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## Как устроено
 
 ```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+src/
+├── components/       секции главной: Hero, Works, Marquee, About, Contact
+│   └── HeroScene.tsx WebGL-остров с шейдером
+├── content/projects/ кейсы в Markdown
+├── data/site.ts      имя, роль, город, контакты, навыки
+├── pages/            главная и страницы кейсов
+└── styles/global.css цвета, шрифты, отступы
+references/hero.frag  GLSL-шейдер первого экрана
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Новый проект — это новый `.md`-файл в `src/content/projects/`: заголовок, клиент, год, роль, стек, два цвета для обложки и порядок в списке.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

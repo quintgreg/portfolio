@@ -1,0 +1,97 @@
+---
+import { site } from '../data/site';
+
+const items = [...site.skills, ...site.skills];
+---
+
+<div class="marquee" aria-label={site.skills.join(', ')}>
+  <div class="marquee__track" aria-hidden="true">
+    {
+      [0, 1].map(() => (
+        <div class="marquee__group">
+          {items.map((skill) => (
+            <>
+              <span class="marquee__item">{skill}</span>
+              <span class="marquee__sep">✳</span>
+            </>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .marquee {
+    overflow: hidden;
+    border-block: 1px solid var(--line);
+    padding-block: clamp(18px, 2.4vw, 28px);
+  }
+
+  .marquee__track {
+    display: flex;
+    width: max-content;
+  }
+
+  .marquee__group {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .marquee__item,
+  .marquee__sep {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(32px, 4.4vw, 56px);
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .marquee__item {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--fg);
+  }
+
+  .marquee__sep {
+    color: var(--accent);
+    padding-inline: clamp(18px, 2.4vw, 36px);
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let ctx: gsap.Context | undefined;
+
+  function init() {
+    const marquee = document.querySelector<HTMLElement>('.marquee');
+    if (!marquee || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    ctx = gsap.context(() => {
+      const tween = gsap.to('.marquee__group', { xPercent: -100, duration: 40, ease: 'none', repeat: -1 });
+      const boost = gsap.quickTo(tween, 'timeScale', { duration: 0.8, ease: 'power3.out' });
+      const settle = gsap.delayedCall(0.15, () => boost(1)).pause();
+
+      ScrollTrigger.create({
+        trigger: marquee,
+        start: 'top bottom',
+        end: 'bottom top',
+        onUpdate(self) {
+          boost(1 + Math.min(Math.abs(self.getVelocity()) / 250, 8));
+          settle.restart(true);
+        },
+      });
+    }, marquee);
+  }
+
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => {
+    ctx?.revert();
+    ctx = undefined;
+  });
+</script>

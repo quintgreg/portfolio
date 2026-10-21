@@ -1,0 +1,300 @@
+---
+import HeroScene from './HeroScene.tsx';
+import { site } from '../data/site';
+
+const words = [
+  { text: 'Сайт,', accent: false },
+  { text: 'который', accent: false },
+  { text: 'хочется', accent: false },
+  { text: 'трогать', accent: true },
+];
+---
+
+<section class="hero" id="top" data-hero>
+  <div class="hero__pin">
+    <div class="hero__bg">
+      <HeroScene client:only="react" />
+    </div>
+
+    <div class="hero__top" data-hero-top>
+      <div class="hero__logo-row">
+        <h1 class="hero__logo" aria-label={words.map((word) => word.text).join(' ')} data-logo>
+          {
+            words.map((word) => (
+              <span class:list={['hero__word', { accent: word.accent }]} aria-hidden="true">
+                <span class="hero__word-inner" data-split>
+                  {word.text}
+                </span>
+              </span>
+            ))
+          }
+        </h1>
+      </div>
+    </div>
+
+    <div class="mono hero__corner hero__corner--left" data-hero-fade>
+      <span>Местное время</span>
+      <span><span data-clock>--:--:--</span> ({site.location})</span>
+    </div>
+    <div class="mono hero__corner hero__corner--right" data-hero-fade>
+      <span class="hero__status"><i class="dot"></i>Открыт к проектам</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    height: 200svh;
+  }
+
+  .hero__pin {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(60% 50% at 65% 40%, rgba(91, 61, 245, 0.35), transparent 70%),
+      radial-gradient(40% 35% at 30% 75%, rgba(198, 244, 50, 0.08), transparent 70%),
+      var(--bg);
+  }
+
+  .hero__bg :global(.hero-scene) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 1.2s var(--ease-out);
+  }
+
+  .hero__bg :global(.hero-scene.is-ready) {
+    opacity: 1;
+  }
+
+  .hero__top {
+    position: relative;
+    padding: clamp(16px, 2vw, 28px) var(--gutter) 0;
+    pointer-events: none;
+  }
+
+  .hero__logo-row {
+    width: 100%;
+  }
+
+  .hero__logo {
+    display: inline-flex;
+    gap: 0.28em;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 5vw;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .hero__word {
+    display: inline-block;
+    overflow: hidden;
+    /* overflow прячет буквы во время вылета снизу; запас сверху — чтобы не срезалась «Й» */
+    padding: 0.14em 0 0.06em;
+    margin-top: -0.14em;
+  }
+
+  .hero__word-inner {
+    display: inline-block;
+  }
+
+  .accent {
+    color: var(--accent);
+  }
+
+  .hero__word-inner :global(.char) {
+    display: inline-block;
+    will-change: transform;
+  }
+
+  .hero__corner {
+    position: absolute;
+    bottom: clamp(16px, 2vw, 28px);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--fg);
+  }
+
+  .hero__corner--left {
+    left: var(--gutter);
+  }
+
+  .hero__corner--right {
+    right: var(--gutter);
+  }
+
+  .hero__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dot {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s var(--ease-out) infinite;
+  }
+
+  @keyframes pulse {
+    from {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+    to {
+      transform: scale(3);
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .hero__logo {
+      flex-wrap: wrap;
+      white-space: normal;
+      font-size: 11vw;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero {
+      height: 100svh;
+    }
+
+    /* без анимаций шапка видна сразу — опускаем заголовок под неё */
+    .hero__top {
+      padding-top: 84px;
+    }
+
+    .dot::after {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let ctx: gsap.Context | undefined;
+  let clock = 0;
+
+  function split(el: HTMLElement) {
+    if (el.dataset.ready) return el.querySelectorAll<HTMLElement>('.char');
+    el.innerHTML = [...(el.textContent ?? '').trim()].map((c) => `<span class="char">${c}</span>`).join('');
+    el.dataset.ready = 'true';
+    return el.querySelectorAll<HTMLElement>('.char');
+  }
+
+  function fitLogo(logo: HTMLElement) {
+    if (window.matchMedia('(max-width: 820px)').matches) {
+      logo.style.fontSize = '';
+      return;
+    }
+    const row = logo.parentElement;
+    if (!row) return;
+    logo.style.fontSize = '100px';
+    logo.style.fontSize = `${(100 * row.clientWidth) / logo.scrollWidth}px`;
+  }
+
+  function startClock(hero: HTMLElement) {
+    const el = hero.querySelector<HTMLElement>('[data-clock]');
+    if (!el) return;
+    const format = new Intl.DateTimeFormat('ru-RU', {
+      timeZone: 'Europe/Moscow',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+    const update = () => {
+      el.textContent = format.format(new Date());
+    };
+    update();
+    clock = window.setInterval(update, 1000);
+  }
+
+  function init() {
+    const hero = document.querySelector<HTMLElement>('[data-hero]');
+    if (!hero) return;
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const logo = hero.querySelector<HTMLElement>('[data-logo]')!;
+    const top = hero.querySelector<HTMLElement>('[data-hero-top]')!;
+    const header = document.querySelector<HTMLElement>('[data-header]');
+    const words = [...hero.querySelectorAll<HTMLElement>('[data-split]')].map(split);
+
+    fitLogo(logo);
+    startClock(hero);
+
+    ctx = gsap.context(() => {
+      if (reduced) return;
+
+      const intro = gsap.timeline({ defaults: { ease: 'expo.out' } });
+      words.forEach((list, i) => {
+        intro.from(list, { yPercent: 110, duration: 1.4, stagger: 0.025 }, 0.15 + i * 0.1);
+      });
+      intro.from('[data-hero-fade]', { autoAlpha: 0, y: 16, duration: 1.2, stagger: 0.1 }, 0.7);
+
+      if (header) gsap.set(header, { autoAlpha: 0 });
+
+      const scroll = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: hero,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.6,
+          invalidateOnRefresh: true,
+        },
+      });
+
+      scroll
+        .fromTo(top, { yPercent: 0, opacity: 1 }, { yPercent: -60, opacity: 0, duration: 0.25, immediateRender: false }, 0)
+        .fromTo(
+          '.hero__corner',
+          { opacity: 1 },
+          { opacity: 0, duration: 0.35, immediateRender: false },
+          0,
+        )
+        .set({}, {}, 1);
+      if (header) scroll.fromTo(header, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.1, immediateRender: false }, 0.32);
+
+      const onRefresh = () => fitLogo(logo);
+      ScrollTrigger.addEventListener('refreshInit', onRefresh);
+
+      return () => ScrollTrigger.removeEventListener('refreshInit', onRefresh);
+    }, hero);
+  }
+
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => {
+    ctx?.revert();
+    ctx = undefined;
+    window.clearInterval(clock);
+  });
+</script>

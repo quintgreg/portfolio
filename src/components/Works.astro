@@ -1,0 +1,571 @@
+---
+import { getCollection } from 'astro:content';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const pad = (n: number) => String(n).padStart(2, '0');
+const link = (project: (typeof projects)[number]) => project.data.href ?? `/work/${project.id}/`;
+---
+
+<section class="works" style={`--count: ${projects.length}`} data-works>
+  <span class="works__anchor" id="works"></span>
+  <div class="works__pin" data-works-pin>
+    <div class="works__side">
+      <p class="mono works__label">(Избранные работы)</p>
+
+      <div class="works__details">
+        {
+          projects.map((project, i) => (
+            <dl class:list={['details', { 'is-active': i === 0 }]} data-detail>
+              <div class="details__title">{project.data.title}</div>
+              <div>
+                <dt class="mono">Клиент</dt>
+                <dd>{project.data.client}</dd>
+              </div>
+              <div>
+                <dt class="mono">Роль</dt>
+                <dd>{project.data.role}</dd>
+              </div>
+              <div>
+                <dt class="mono">Год</dt>
+                <dd>{project.data.year}</dd>
+              </div>
+              <div>
+                <dt class="mono">Стек</dt>
+                <dd>{project.data.stack.join(', ')}</dd>
+              </div>
+            </dl>
+          ))
+        }
+      </div>
+
+      <div class="works__counter" aria-hidden="true">
+        <span class="works__index" data-index>01</span>
+        <span class="mono works__total">/{pad(projects.length)}</span>
+      </div>
+    </div>
+
+    <div class="works__stage" aria-hidden="true">
+      {
+        projects.map((project, i) => (
+          <a
+            class="plane"
+            href={link(project)}
+            tabindex="-1"
+            style={`--c1: ${project.data.colors[0]}; --c2: ${project.data.colors[1]}`}
+            data-plane
+          >
+            <span class="plane__glow" />
+            <span class="plane__grain" />
+            <span class="mono plane__tag">{project.data.href ? 'Свободно' : 'Скоро'}</span>
+            <span class="plane__num">{pad(i + 1)}</span>
+            <span class="mono plane__name">{project.data.title}</span>
+          </a>
+        ))
+      }
+    </div>
+
+    <div class="works__rules" aria-hidden="true" data-rules>
+      {projects.slice(1).map(() => <span class="works__rule" />)}
+    </div>
+
+    <ul class="works__list" data-list>
+      {
+        projects.map((project, i) => (
+          <li class:list={['item', { 'is-active': i === 0 }]} data-item>
+            <a href={link(project)}>
+              <span class="mono item__client">{project.data.client}</span>
+              <span class="item__title" transition:name={`project-${project.id}`}>
+                {project.data.title}
+              </span>
+              <span class="item__dash" />
+              <span class="item__summary">{project.data.summary}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>  </div>
+</section>
+
+<style>
+  .works {
+    --thumb: 0.4;
+    position: relative;
+    z-index: 2;
+    margin-top: -200svh;
+    height: calc(var(--count) * 90svh + 200svh);
+  }
+
+  .works__anchor {
+    position: absolute;
+    top: 100svh;
+  }
+
+  .works__pin {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+    background: var(--bg);
+    transform-origin: 50% 100%;
+    transform: scale(var(--thumb));
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 1.6fr minmax(280px, 1.1fr);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 32px;
+    padding: 96px var(--gutter) 40px;
+  }
+
+  .works__side {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  /* Детали центрируем по высоте сцены, а не между подписью и счётчиком —
+     так они стоят на одной линии с карточкой и активным названием справа. */
+  .works__details {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    display: grid;
+    transform: translateY(-50%);
+  }
+
+  .details {
+    grid-area: 1 / 1;
+    display: grid;
+    gap: 14px;
+    margin: 0;
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.5s var(--ease-out),
+      transform 0.6s var(--ease-out);
+  }
+
+  .details.is-active {
+    opacity: 1;
+    transform: none;
+  }
+
+  .details > div {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 16px;
+    align-items: baseline;
+  }
+
+  .details dd {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .details__title {
+    display: none !important;
+  }
+
+  .works__counter {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  .works__index {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(96px, 13vw, 220px);
+    line-height: 0.8;
+    letter-spacing: -0.06em;
+  }
+
+  .works__total {
+    padding-bottom: 0.6em;
+  }
+
+  .works__stage {
+    position: relative;
+    perspective: 1400px;
+    perspective-origin: 50% 50%;
+  }
+
+  .plane {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(34vw, 560px);
+    aspect-ratio: 4 / 3;
+    margin: calc(min(34vw, 560px) * -0.375) 0 0 calc(min(34vw, 560px) * -0.5);
+    overflow: hidden;
+    background: #141418;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+  }
+
+  .plane__glow {
+    position: absolute;
+    inset: -20%;
+    background:
+      radial-gradient(45% 55% at 30% 30%, var(--c1), transparent 70%),
+      radial-gradient(40% 50% at 75% 75%, var(--c2), transparent 70%);
+    filter: blur(20px);
+    opacity: 0.85;
+    animation: drift 9s ease-in-out infinite alternate;
+  }
+
+  .plane__grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.18;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .plane__tag {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    padding: 6px 10px;
+    border: 1px solid rgba(237, 235, 230, 0.35);
+    border-radius: 999px;
+    color: var(--fg);
+    font-size: 11px;
+  }
+
+  .plane__num {
+    position: absolute;
+    right: 12px;
+    bottom: -0.12em;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(64px, 9vw, 150px);
+    line-height: 1;
+    letter-spacing: -0.06em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(237, 235, 230, 0.6);
+  }
+
+  .plane__name {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    color: var(--fg);
+  }
+
+  /* Линии-разделители между проектами: идут через карусель и список,
+     двигаются вместе с ними (позицию ставит render()). */
+  .works__rules {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .works__rule {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(237, 235, 230, 0.28);
+  }
+
+  .works__list {
+    position: relative;
+    z-index: 2;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-self: start;
+    text-align: center;
+    will-change: transform;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--step, 34svh);
+    opacity: 0.22;
+    transition: opacity 0.5s var(--ease-out);
+  }
+
+  .item.is-active {
+    opacity: 1;
+  }
+
+  .item a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .item__title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(26px, 2.6vw, 44px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    transition: color 0.4s var(--ease-out);
+  }
+
+  .item a:hover .item__title {
+    color: var(--accent);
+  }
+
+  .item__dash {
+    width: 14px;
+    height: 1px;
+    background: currentColor;
+  }
+
+  .item__summary {
+    max-width: 34ch;
+    color: var(--soft);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  @keyframes drift {
+    from {
+      transform: translate(-4%, -3%) rotate(0deg);
+    }
+    to {
+      transform: translate(4%, 3%) rotate(8deg);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .works {
+      --thumb: 0.36;
+    }
+
+    .works__details {
+      position: relative;
+      top: auto;
+      transform: none;
+    }
+
+    .works__pin {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+      padding-top: 84px;
+    }
+
+    .works__list,
+    .works__rules {
+      display: none;
+    }
+
+    .works__side {
+      grid-row: 2;
+      justify-content: flex-end;
+      gap: 24px;
+    }
+
+    .works__stage {
+      position: absolute;
+      inset: 70px 0 auto;
+      height: 50svh;
+    }
+
+    .plane {
+      width: 78vw;
+      margin: -29.25vw 0 0 -39vw;
+    }
+
+    .details__title {
+      display: block !important;
+      font-family: var(--font-display);
+      font-size: 26px;
+      text-transform: uppercase;
+    }
+
+    .works__index {
+      font-size: 72px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .works {
+      margin-top: 0;
+      height: calc(var(--count) * 90svh + 100svh);
+    }
+
+    .works__anchor {
+      top: 0;
+    }
+
+    .works__pin {
+      transform: none;
+    }
+
+    .plane__glow {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let ctx: gsap.Context | undefined;
+
+  function init() {
+    const section = document.querySelector<HTMLElement>('[data-works]');
+    if (!section) return;
+
+    const planes = [...section.querySelectorAll<HTMLElement>('[data-plane]')];
+    const items = [...section.querySelectorAll<HTMLElement>('[data-item]')];
+    const details = [...section.querySelectorAll<HTMLElement>('[data-detail]')];
+    const list = section.querySelector<HTMLElement>('[data-list]');
+    const index = section.querySelector<HTMLElement>('[data-index]');
+    const count = planes.length;
+    if (!count) return;
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const state = { target: 0, current: 0, active: -1 };
+
+    const rules = section.querySelector<HTMLElement>('[data-rules]');
+    const ruleEls = rules ? [...rules.children].map((el) => el as HTMLElement) : [];
+    let step = 0;
+
+    // Шаг между проектами — общий для карточек, пунктов списка и линий.
+    // Не меньше высоты карточки с запасом на наклон, чтобы соседи не пересекались.
+    const measure = () => {
+      const planeH = planes[0].offsetHeight;
+      step = Math.max(window.innerHeight * 0.62, planeH * 1.25 + 48);
+      section.style.setProperty('--step', `${step}px`);
+      const stageEl = planes[0].parentElement!;
+      if (rules) rules.style.left = `${stageEl.offsetLeft}px`;
+    };
+    measure();
+
+    const render = () => {
+      const p = state.current;
+      planes.forEach((plane, i) => {
+        const d = i - p;
+        const abs = Math.abs(d);
+        const y = d * step;
+        const x = d * window.innerWidth * -0.05;
+        const z = -abs * 260;
+        plane.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateX(${d * -22}deg) rotateY(${-14 + d * 10}deg) rotateZ(${-4 + d * 3}deg)`;
+        plane.style.opacity = String(Math.max(0, 1 - abs * 1.25));
+        plane.style.zIndex = String(100 - Math.round(abs * 10));
+        plane.style.pointerEvents = abs < 0.3 ? 'auto' : 'none';
+      });
+
+      if (list && items[0]) {
+        // центр активного пункта — на уровне центра сцены (там же центр карточки)
+        const stageEl = planes[0].parentElement!;
+        const center = stageEl.offsetTop + stageEl.offsetHeight / 2;
+        list.style.transform = `translateY(${center - list.offsetTop - step / 2 - p * step}px)`;
+        // линия i — ровно посередине между проектами i и i + 1
+        ruleEls.forEach((rule, i) => {
+          rule.style.transform = `translateY(${center + (i + 0.5 - p) * step}px)`;
+        });
+      }
+
+      const active = Math.round(p);
+      if (active !== state.active) {
+        state.active = active;
+        items.forEach((item, i) => item.classList.toggle('is-active', i === active));
+        details.forEach((detail, i) => detail.classList.toggle('is-active', i === active));
+        if (index) {
+          const value = String(active + 1).padStart(2, '0');
+          if (reduced) index.textContent = value;
+          else
+            gsap
+              .timeline()
+              .to(index, { yPercent: -30, autoAlpha: 0, duration: 0.18, ease: 'power2.in' })
+              .add(() => {
+                index.textContent = value;
+              })
+              .fromTo(index, { yPercent: 30, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: 0.35, ease: 'power3.out' });
+        }
+      }
+    };
+
+    const pin = section.querySelector<HTMLElement>('[data-works-pin]');
+
+    ctx = gsap.context(() => {
+      if (pin && !reduced) {
+        // Миниатюра — это вся сцена, уменьшенная целиком (scale от нижнего края),
+        // поэтому в маленьком окне видно ровно то же, что и в развёрнутом.
+        const thumb = parseFloat(getComputedStyle(section).getPropertyValue('--thumb')) || 0.4;
+        gsap.fromTo(
+          pin,
+          { yPercent: 100 },
+          { yPercent: 0, duration: 1.6, delay: 0.6, ease: 'expo.out' },
+        );
+        gsap.fromTo(
+          pin,
+          { scale: thumb },
+          {
+            scale: 1,
+            ease: 'power2.inOut',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: section,
+              start: 'top top',
+              end: () => `+=${window.innerHeight}`,
+              scrub: 0.6,
+              invalidateOnRefresh: true,
+            },
+          },
+        );
+      }
+
+      ScrollTrigger.create({
+        trigger: section,
+        start: () => (reduced ? 'top top' : `top top-=${window.innerHeight}`),
+        end: 'bottom bottom',
+        invalidateOnRefresh: true,
+        snap: count > 1 ? { snapTo: 1 / (count - 1), duration: { min: 0.2, max: 0.6 }, ease: 'power2.inOut' } : undefined,
+        onUpdate(self) {
+          state.target = self.progress * (count - 1);
+          if (reduced) {
+            state.current = state.target;
+            render();
+          }
+        },
+      });
+
+      const tick = () => {
+        const delta = state.target - state.current;
+        if (Math.abs(delta) < 0.0005) return;
+        state.current += delta * 0.09;
+        render();
+      };
+      if (!reduced) gsap.ticker.add(tick);
+
+      const onResize = () => {
+        measure();
+        render();
+      };
+      window.addEventListener('resize', onResize);
+      render();
+
+      return () => {
+        gsap.ticker.remove(tick);
+        window.removeEventListener('resize', onResize);
+      };
+    }, section);
+  }
+
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => {
+    ctx?.revert();
+    ctx = undefined;
+  });
+</script>

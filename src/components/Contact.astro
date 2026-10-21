@@ -1,0 +1,186 @@
+---
+import { site } from '../data/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="contact" id="contact">
+  <p class="mono">(Есть идея?)</p>
+
+  <h2 class="contact__title" data-reveal>
+    <span class="buzz">Давайте сделаем что-то</span> <span class="plate"><span class="word3d" data-text="живое">живое</span></span>
+  </h2>
+
+  <a class="contact__email" href={`mailto:${site.email}`} data-reveal>{site.email}</a>
+
+  <div class="contact__bottom">
+    <span class="mono">© {year} {site.name}</span>
+    <ul class="contact__socials">
+      {
+        site.socials.map((social) => (
+          <li>
+            <a class="mono" href={social.href} target="_blank" rel="noopener noreferrer">
+              {social.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <span class="mono">{site.location}</span>
+  </div>
+</footer>
+
+<style>
+  .contact {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(28px, 4vw, 48px);
+    padding: clamp(80px, 12vw, 160px) var(--gutter) 32px;
+    border-top: 1px solid var(--line);
+  }
+
+  .contact__title {
+    max-width: 14ch;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(40px, 7.4vw, 128px);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+  }
+
+  /* «Старая лампа»: steps-анимация без плавных переходов — свет щёлкает,
+     гаснет и загорается уже другим цветом (плашка и слово меняются вместе). */
+  .plate {
+    display: inline-block;
+    padding: 0.02em 0.1em 0.06em;
+    background: var(--accent);
+    color: var(--bg);
+    animation: lamp 14s step-end infinite;
+  }
+
+  /* Остальная фраза слегка «подрагивает», как гудящая трубка. Своя длительность — чтобы не мигать синхронно. */
+  .buzz {
+    text-shadow: 0 0 0.4em rgba(237, 235, 230, 0.18);
+    animation: buzz 9s step-end infinite;
+  }
+
+  @keyframes lamp {
+    0%, 11.5%, 12.6%, 31%, 100% {
+      background-color: var(--accent);
+      color: var(--bg);
+      box-shadow: 0 0 0.3em rgba(198, 244, 50, 0.55), 0 0 1.2em rgba(198, 244, 50, 0.25);
+    }
+    33%, 34.4%, 46.5%, 64% {
+      background-color: var(--glow);
+      color: var(--accent);
+      box-shadow: 0 0 0.3em rgba(91, 61, 245, 0.6), 0 0 1.2em rgba(91, 61, 245, 0.3);
+    }
+    66%, 67.4%, 80.4%, 97% {
+      background-color: var(--fg);
+      color: var(--glow);
+      box-shadow: 0 0 0.3em rgba(237, 235, 230, 0.4), 0 0 1.2em rgba(237, 235, 230, 0.18);
+    }
+    11%, 12.2%, 30%, 31.6%, 33.6%, 46%, 63%, 64.5%, 66.6%, 80%, 96%, 97.6% {
+      background-color: #17171b;
+      color: rgba(237, 235, 230, 0.16);
+      box-shadow: none;
+    }
+    /* последний «щелчок» перед возвратом к лайму */
+    99% {
+      background-color: var(--accent);
+      color: var(--bg);
+      box-shadow: 0 0 0.3em rgba(198, 244, 50, 0.55), 0 0 1.2em rgba(198, 244, 50, 0.25);
+    }
+  }
+
+  @keyframes buzz {
+    0%, 23.4%, 24.3%, 61.8%, 100% {
+      opacity: 1;
+    }
+    23% {
+      opacity: 0.35;
+    }
+    24% {
+      opacity: 0.6;
+    }
+    61% {
+      opacity: 0.25;
+    }
+  }
+
+  .word3d {
+    position: relative;
+    display: inline-block;
+    isolation: isolate;
+  }
+
+  .word3d::before {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    color: rgba(0, 0, 0, 0.3);
+    transform: translate(-0.04em, -0.045em);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .word3d::selection {
+    background: transparent;
+    color: var(--glow);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plate,
+    .buzz {
+      animation: none;
+    }
+  }
+
+  .contact__email {
+    width: fit-content;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(22px, 3.4vw, 48px);
+    background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat;
+    padding-bottom: 6px;
+    transition:
+      color 0.4s var(--ease-out),
+      background-size 0.6s var(--ease-out);
+  }
+
+  .contact__email:hover {
+    color: var(--accent);
+    background-size: 0% 1px;
+    background-position: 100% 100%;
+  }
+
+  .contact__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px 32px;
+    margin-top: clamp(40px, 8vw, 120px);
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+
+  .contact__socials {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .contact__socials a {
+    transition: color 0.3s var(--ease-out);
+  }
+
+  .contact__socials a:hover {
+    color: var(--accent);
+  }
+</style>

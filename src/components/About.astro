@@ -1,0 +1,60 @@
+---
+import { site } from '../data/site';
+---
+
+<section class="about" id="about">
+  <p class="mono">(Обо мне)</p>
+  <div class="about__body">
+    <p class="about__lead" data-reveal>{site.intro}</p>
+    <ul class="about__skills" data-reveal>
+      {site.skills.map((skill) => <li class="mono">{skill}</li>)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .about {
+    display: grid;
+    grid-template-columns: minmax(140px, 1fr) 3fr;
+    gap: 32px;
+    padding: clamp(80px, 10vw, 140px) var(--gutter);
+    border-top: 1px solid var(--line);
+  }
+
+  .about__body {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(32px, 4vw, 56px);
+  }
+
+  .about__lead {
+    max-width: 22ch;
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(26px, 3.6vw, 52px);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .about__skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .about__skills li {
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--soft);
+  }
+
+  @media (max-width: 720px) {
+    .about {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

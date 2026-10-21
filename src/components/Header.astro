@@ -1,0 +1,76 @@
+---
+import { site } from '../data/site';
+
+const links = [
+  { label: 'Работы', href: '/#works' },
+  { label: 'Обо мне', href: '/#about' },
+  { label: 'Контакты', href: '/#contact' },
+];
+---
+
+<header class="header" data-header>
+  <a class="header__name" href="/">{site.name}</a>
+  <nav class="header__nav">
+    {links.map((link) => <a class="mono" href={link.href}>{link.label}</a>)}
+  </nav>
+</header>
+
+<style>
+  .header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 20px var(--gutter);
+    background: linear-gradient(to bottom, rgba(11, 11, 13, 0.85), rgba(11, 11, 13, 0.6));
+    border-bottom: 1px solid var(--line);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+
+  /* На главной шапка скрыта, пока виден заголовок hero (иначе до запуска JS она
+     на мгновение ложится поверх букв). Показывает её скролл-таймлайн в Hero. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global(body:has([data-hero])) .header {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  .header__name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .header__nav {
+    display: flex;
+    gap: clamp(16px, 3vw, 40px);
+  }
+
+  .header__nav a {
+    color: var(--soft);
+    transition: color 0.3s var(--ease-out);
+  }
+
+  .header__nav a:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 560px) {
+    .header__name {
+      font-size: 13px;
+    }
+
+    .header__nav a {
+      font-size: 11px;
+    }
+  }
+</style>

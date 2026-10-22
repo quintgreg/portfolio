@@ -6,13 +6,6 @@ dist/
 # dependencies
 node_modules/
 
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-
 # environment variables
 .env
 .env.production
@@ -24,14 +17,3 @@ pnpm-debug.log*
 .idea/
 .vscode/
 
-# Windows
-Thumbs.db
-desktop.ini
-
-# инструменты записи видео-тура — локально, в репозиторий не входят
-site-video/
-
-# заметки и подсказки для ИИ-ассистентов — для запуска не нужны
-CLAUDE.md
-AGENTS.md
-.claude/

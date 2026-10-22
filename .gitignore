@@ -20,8 +20,18 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
-# jetbrains setting folder
+# настройки редакторов
 .idea/
+.vscode/
+
+# Windows
+Thumbs.db
+desktop.ini
 
 # инструменты записи видео-тура — локально, в репозиторий не входят
 site-video/
+
+# заметки и подсказки для ИИ-ассистентов — для запуска не нужны
+CLAUDE.md
+AGENTS.md
+.claude/
